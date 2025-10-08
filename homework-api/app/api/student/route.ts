@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/database';
-import Homework from '@/models/HomeworkTemplate';
+import connectDB from '@/app/lib/database';
+import Homework from '@/app/models/HomeworkTemplate';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import { Readable } from 'stream';

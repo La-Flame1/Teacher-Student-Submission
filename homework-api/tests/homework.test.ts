@@ -1,5 +1,5 @@
-import Homework from '@/models/HomeworkTemplate';
-import connectDB from '@/lib/database';
+import Homework from '@/app/models/HomeworkTemplate';
+import connectDB from '@/app/lib/database';
 import mongoose from 'mongoose';
 
 jest.mock('@/lib/database', () => ({

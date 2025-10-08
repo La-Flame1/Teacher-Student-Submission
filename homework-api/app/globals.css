@@ -1,26 +1,154 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ===========
+   GLOBAL LAYOUT STYLES
+   =========== */
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-800 antialiased dark:bg-gray-900 dark:text-gray-100;
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  h1, h2, h3 {
+    @apply font-bold text-gray-800 dark:text-white;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ===========
+   GLOBAL COMPONENT STYLES
+   =========== */
+@layer components {
+  /* ---- DASHBOARD WRAPPER ---- */
+  .dashboard-page {
+    @apply min-h-screen flex flex-col items-center py-10 px-4 bg-gray-50 dark:bg-gray-900;
+  }
+
+  .dashboard-container {
+    @apply max-w-6xl w-full;
+  }
+
+  .dashboard-header {
+    @apply text-4xl font-bold text-center mb-3 text-gray-900 dark:text-green-300;
+  }
+
+  .dashboard-subtitle {
+    @apply text-gray-600 text-center mb-10 dark:text-gray-300;
+  }
+
+  /* ---- ALERT STYLES ---- */
+  .alert {
+    @apply text-center mb-6 py-3 px-4 rounded-lg font-medium border transition-all duration-300;
+  }
+
+  .alert-success {
+    @apply bg-green-100 text-green-700 border-green-300 dark:bg-green-900/20 dark:text-green-300 dark:border-green-600;
+  }
+
+  .alert-error {
+    @apply bg-red-100 text-red-700 border-red-300 dark:bg-red-900/20 dark:text-red-300 dark:border-red-600;
+  }
+
+  /* ---- CARD / SECTION WRAPPERS ---- */
+  .card {
+    @apply bg-white p-6 rounded-2xl shadow-md dark:bg-gray-800;
+  }
+
+  .card-title {
+    @apply text-xl font-semibold mb-4 text-gray-900 dark:text-white;
+  }
+
+  /* ---- FILTER GRID ---- */
+  .filter-grid {
+    @apply grid grid-cols-1 md:grid-cols-4 gap-4;
+  }
+
+  .filter-input {
+    @apply border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100;
+  }
+
+  .filter-label {
+    @apply text-sm text-gray-500 dark:text-gray-400 mb-1 block;
+  }
+
+  /* ---- SUBMISSION GRID ---- */
+  .submission-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  }
+
+  /* ---- EMPTY STATE ---- */
+  .empty-state {
+    @apply text-center text-gray-500 py-16 text-lg dark:text-gray-400;
+  }
+
+  /* ===========
+     HOME PAGE STYLES
+     =========== */
+  .home-wrapper {
+    @apply min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800;
+  }
+
+  .home-container {
+    @apply max-w-md w-full text-center space-y-6;
+  }
+
+  .home-title {
+    @apply text-4xl font-bold text-gray-900 dark:text-white;
+  }
+
+  .home-subtitle {
+    @apply text-lg text-gray-600 dark:text-gray-300;
+  }
+
+  .home-buttons {
+    @apply flex space-x-4 justify-center;
+  }
+
+  .btn-student {
+    @apply bg-blue-100 hover:bg-blue-200 border-2 border-blue-500 text-blue-700 font-semibold py-3 px-6 rounded-lg transition-colors flex-1 max-w-xs dark:bg-blue-900/20 dark:hover:bg-blue-800/20 dark:border-blue-400 dark:text-blue-300;
+  }
+
+  .btn-teacher {
+    @apply bg-green-100 hover:bg-green-200 border-2 border-green-500 text-green-700 font-semibold py-3 px-6 rounded-lg transition-colors flex-1 max-w-xs dark:bg-green-900/20 dark:hover:bg-green-800/20 dark:border-green-400 dark:text-green-300;
+  }
+
+  /* ===========
+     THEME COLORS
+     =========== */
+  /* STUDENT THEME */
+  .theme-student .accent {
+    @apply text-blue-600 dark:text-blue-400;
+  }
+
+  .theme-student .accent-bg {
+    @apply bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-600;
+  }
+
+  /* TEACHER THEME */
+  .theme-teacher .accent {
+    @apply text-purple-600 dark:text-purple-400;
+  }
+
+  .theme-teacher .accent-bg {
+    @apply bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-600;
+  }
+
+  /* UPLOAD BOX STYLING */
+  .upload-box {
+    @apply border-2 border-dashed rounded-2xl flex flex-col items-center justify-center h-64 text-center transition-all duration-300 cursor-pointer;
+  }
+
+  .upload-box-idle {
+    @apply border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-blue-500 dark:hover:bg-gray-800/50;
+  }
+
+  .upload-box-valid {
+    @apply border-green-400 bg-green-50 dark:border-green-500 dark:bg-green-900/20;
+  }
+
+  .upload-box-invalid {
+    @apply border-red-400 bg-red-50 dark:border-red-500 dark:bg-red-900/20;
+  }
+
+  .upload-instructions {
+    @apply text-gray-600 text-lg font-medium mt-4 dark:text-gray-400;
+  }
 }
