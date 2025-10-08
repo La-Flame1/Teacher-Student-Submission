@@ -18,20 +18,20 @@ export default function StudentPage() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<{ type: 'success' | 'error' | ''; message: string }>({ type: '', message: '' });
 
-  const validFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const validFileTypes = ['application/pdf', 'image/jpeg'];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (selected) {
-      if (validFileTypes.includes(selected.type)) {
-        setFileStatus('valid');
-        setFile(selected);
-      } else {
-        setFileStatus('invalid');
-        setFile(null);
-      }
+  const selected = e.target.files?.[0];
+  if (selected) {
+    if (validFileTypes.includes(selected.type)) {
+      setFileStatus('valid');
+      setFile(selected);
+    } else {
+      setFileStatus('invalid');
+      setFile(null);
     }
-  };
+  }
+};
 
   const fetchSubmissions = async () => {
     try {
@@ -51,38 +51,39 @@ export default function StudentPage() {
     fetchSubmissions();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !studentName || !assignmentName) {
-      setStatus({ type: 'error', message: 'All fields are required.' });
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!file) return;
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('studentName', studentName);
-    formData.append('assignmentName', assignmentName);
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('studentName', studentName);
+  formData.append('assignmentName', assignmentName);
 
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-      const res = await fetch(`${baseUrl}/api/student`, {
-        method: 'POST',
-        body: formData,
-      });
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/student`, {
+      method: 'POST',
+      body: formData,
+    });
 
-      if (!res.ok) throw new Error('Upload failed');
-      setStatus({ type: 'success', message: 'Paper uploaded successfully!' });
-      setFile(null);
-      setAssignmentName('');
-      setStudentName('');
-      setFileStatus('idle');
-      fetchSubmissions();
-    } catch {
-      setStatus({ type: 'error', message: 'Failed to upload paper. Please try again.' });
-    } finally {
-      setTimeout(() => setStatus({ type: '', message: '' }), 4000);
-    }
-  };
+    const data = await res.json();
+    console.log('📦 Upload response:', res.status, data);
+
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    
+    setStatus({ type: 'success', message: data.message || 'Paper uploaded successfully!' });
+    setFile(null);
+    setAssignmentName('');
+    setStudentName('');
+    setFileStatus('idle');
+    await fetchSubmissions();
+  } catch (error) {
+    setStatus({ type: 'error', message: 'Failed to upload paper. Please try again.' });
+  } finally {
+    setTimeout(() => setStatus({ type: '', message: '' }), 4000);
+  }
+};
 
   return (
     <div className="theme-student dashboard-page">
@@ -140,11 +141,11 @@ export default function StudentPage() {
                     {fileStatus === 'valid'
                       ? 'Valid file detected — ready to upload.'
                       : fileStatus === 'invalid'
-                      ? 'Invalid file type! Only PDF or DOCX allowed.'
-                      : 'Only PDF or DOCX files are supported.'}
+                      ? 'Invalid file type! Only PDF or JPEG allowed.'
+                      : 'Only PDF or JPEG files are supported.'}
                   </p>
                 </div>
-                <input id="file" type="file" accept=".pdf,.docx" className="hidden" onChange={handleFileChange} />
+                <input id="file" type="file" accept=".pdf,.jpeg,.jpg" className="hidden" onChange={handleFileChange} />
               </label>
 
               <button

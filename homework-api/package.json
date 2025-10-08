@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "set NODE_OPTIONS=--openssl-legacy-provider && next dev",
     "build": "next build --turbopack",
     "start": "next start",
     "test": "jest"
@@ -11,11 +11,14 @@
   "dependencies": {
     "cloudinary": "^2.7.0",
     "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.20.0",
     "mongoose": "^8.19.1",
     "multer": "^2.0.2",
     "next": "15.5.4",
+    "next-swagger-doc": "^0.4.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "swagger-ui-react": "^5.29.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -26,7 +29,9 @@
     "@types/node": "^24.7.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/swagger-ui-react": "^5.18.0",
     "eslint": "^9.37.0",
+    "eslint-plugin-jsdoc": "^61.0.0",
     "jest": "^30.2.0",
     "prettier": "^3.6.2",
     "supertest": "^7.1.4",

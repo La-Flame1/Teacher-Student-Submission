@@ -9,12 +9,13 @@ interface GradeFormProps {
 }
 
 export default function GradeForm({ submission, onGrade }: GradeFormProps) {
-  const [grade, setGrade] = useState(submission.level?.toString() || 'ungraded'); // Use .level (number -> string for select)
+  const [grade, setGrade] = useState(submission.grade || 'ungraded'); // Use .level (number -> string for select)
   const [notes, setNotes] = useState(submission.teacherNotes || '');
 
   const handleGrade = async () => {
     const numericGrade = grade === 'ungraded' ? 0 : parseInt(grade, 10); // Convert back to number
-    await onGrade(submission._id, numericGrade.toString(), notes); // Pass as string if API expects it
+    if (!submission._id) return; // Guard against undefined id
+    await onGrade(submission._id, grade, notes); // Pass as string if API expects it
   };
 
   return (

@@ -1,103 +1,92 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/app/lib/database';
-import Homework from '@/app/models/HomeworkTemplate';
+import { Readable } from 'stream';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
-import { Readable } from 'stream';
+import connectDB from '@/lib/database';
+import Homework from '@/app/models/HomeworkTemplate';
 
-// Configure Cloudinary (from .env)
-cloudinary.config({ cloud_name: process.env.CLOUDINARY_URL });
+// Proper Cloudinary setup
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
 
-// Multer configuration for memory storage (stream to Cloudinary)
+// Multer setup
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (
-    req,
-    file,
-    callback
-  ) => {
-    if (!file.mimetype.match(/^(image\/jpeg|application\/pdf)$/)) {
-      return callback(new Error('Only JPEG and PDF files are allowed'));
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.match(/^(application\/pdf|image\/jpeg|image\/jpg)$/)) {
+      return cb(new Error('Only PDF and JPEG files allowed'));
     }
-    callback(null, true);
+    cb(null, true);
   },
 }).single('file');
 
-// Middleware to handle file upload
-async function handleUpload(req: NextRequest) {
+//Helper
+async function parseUpload(req: any) {
   return new Promise((resolve, reject) => {
-    upload(req as any, {} as any, (err) => {
-      if (err) reject(err);
-      else resolve(req);
-    });
+    upload(req, {} as any, (err: any) => (err ? reject(err) : resolve(req)));
   });
 }
 
+// POST: Upload homework
 export async function POST(req: NextRequest) {
   await connectDB();
-
   try {
-    // Parse form data and handle file upload
     const formData = await req.formData();
     const assignmentName = formData.get('assignmentName') as string;
     const studentName = formData.get('studentName') as string;
+    const file = formData.get('file') as File;
 
-    if (!assignmentName || !studentName) {
+    if (!assignmentName || !studentName || !file)
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
 
-    const reqWithFile = await handleUpload(req);
-    const file = (reqWithFile as any).file;
-
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
-    }
-
-    
-
-    // Upload to Cloudinary
-    const stream = Readable.from(file.buffer);
+    // Convert file to Buffer
+    const buffer = Buffer.from(await file.arrayBuffer());
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         { resource_type: 'auto' },
-        (error, result) => (error ? reject(error) : resolve(result))
+        (err, result) => {
+          if (err) {
+            console.error('Cloudinary upload error:', err);
+            return reject(err);
+          }
+          console.log('Uploaded to Cloudinary:', result?.secure_url);
+          resolve(result);
+        }
       );
-      stream.pipe(uploadStream);
+      Readable.from(buffer).pipe(uploadStream);
     });
-    
+
+    const { secure_url } = uploadResult as { secure_url: string };
 
     // Save to MongoDB
     const homework = new Homework({
       assignmentName,
       studentName,
-      fileUrl: (uploadResult as { secure_url: string }).secure_url,
+      fileUrl: secure_url,
     });
     await homework.save();
 
-    return NextResponse.json({ message: 'Homework submitted', id: homework._id }, { status: 201 });
-  } catch (error) {
-    console.error('Submission error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { message: 'Homework submitted successfully', homework },
+      { status: 201 }
+    );
+  } catch (err: any) {
+    console.error('Submission error:', err);
+    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function GET(req: NextRequest) {
+// GET: Fetch submissions
+export async function GET() {
   await connectDB();
-
   try {
-    const url = new URL(req.url);
-    const grade = url.searchParams.get('grade') as string;
-    const assignmentName = url.searchParams.get('assignmentName') as string;
-
-    const query: any = { studentName: 'currentStudent' }; // Replace with authenticated user
-    if (grade) query.grade = grade;
-    if (assignmentName) query.assignmentName = { $regex: assignmentName, $options: 'i' };
-
-    const submissions = await Homework.find(query).lean();
-    return NextResponse.json(submissions, { status: 200 });
-  } catch (error) {
-    console.error('Fetch error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const submissions = await Homework.find();
+    return NextResponse.json(submissions);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }

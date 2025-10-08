@@ -17,6 +17,7 @@ Swagger can also be used to document your enpoints.
 -   View their homework submissions
     -   Filter by grade (A - F, incomplete, ungraded)
     -   Filter by assignment name
+    
 -   There should be API routes that allow teachers to:
     -   See an overview of all homework submissions
         -   Filter by assignment name, date range (to - from), and individual student name
